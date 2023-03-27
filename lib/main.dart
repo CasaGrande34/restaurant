@@ -1,8 +1,10 @@
 import 'dart:ui';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:restaurant_app_2/providers/device_info.dart';
 import 'package:restaurant_app_2/services/data_spreadsheet.dart';
 import 'package:restaurant_app_2/theme/theme_charger.dart';
 import 'routes/routes_delegate.dart';
@@ -37,6 +39,9 @@ class AppState extends StatelessWidget {
         // ),
         ChangeNotifierProvider(
           create: (_) => ThemeCharger(1),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => DeviceInfoProvider(),
         ),
       ],
       child: const MyApp(),

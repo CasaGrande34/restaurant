@@ -3,11 +3,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:provider/provider.dart';
 
+import '../../../providers/device_info.dart';
 import '../../../services/data_spreadsheet.dart';
 import '../../../utils/utils_exports.dart';
 import '../widgets/title_connection_url.dart';
 
-const idDeEmpresa = 'IDDEEMEPRESA';
+const idDeEmpresa = 'IDDEEMEPRESA2';
 
 class RegisterTableView extends StatefulWidget {
   const RegisterTableView({super.key});
@@ -20,9 +21,16 @@ class _RegisterTableViewState extends State<RegisterTableView> {
   bool isButtonPressed = false;
 
   @override
+  void initState() {
+    super.initState();
+    Provider.of<DeviceInfoProvider>(context, listen: false).initDeviceInfo();
+  }
+
+  @override
   Widget build(BuildContext context) {
     //Providar de Sheet
     final dataProvider = Provider.of<DataSpreadSheet>(context);
+
     final h = MediaQuery.of(context).size.height;
     final w = MediaQuery.of(context).size.width;
 
@@ -38,7 +46,6 @@ class _RegisterTableViewState extends State<RegisterTableView> {
                   TextButton(
                     child: const Text('Quedarse con el nuevo'),
                     onPressed: () async {
-                      await dataProvider.saveReferences();
                       await dataProvider.getCategoriesListComplete();
                       Navigator.pushNamed(
                           context, '/listTable'); // Cierra el cuadro de diálogo
@@ -204,8 +211,10 @@ class _RegisterTableViewState extends State<RegisterTableView> {
                             children: [
                               ElevatedButton(
                                 onPressed: () async {
-                                  await dataProvider.createDocumentWithId(
-                                      idDeEmpresa, dataProvider.references);
+                                  await dataProvider
+                                      .createOrUpdateDocumentWithId(
+                                          DeviceInfoProvider.deviceId,
+                                          dataProvider.references);
                                 },
                                 // onPressed: () async {
                                 //   bool hasData = await dataProvider.checkData();

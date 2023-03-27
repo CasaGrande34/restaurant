@@ -138,50 +138,69 @@ class DataSpreadSheet extends ChangeNotifier {
     }
   }
 
-  Future<void> createDocumentWithId(
-      String documentId, Map<String, dynamic> data) async {
-    // Obtener una referencia al documento que se desea crear con el id especificado
-    DocumentReference docRef =
+  Future<void> createOrUpdateDocumentWithId(
+      String documentId, Map<String, dynamic> references) async {
+    // Obtener una referencia al documento que se desea crear o actualizar con el id especificado
+    DocumentReference documentRef =
         FirebaseFirestore.instance.collection('references').doc(documentId);
 
-    // Crear el documento con los datos proporcionados
-    await docRef.set(data);
-  }
+    // Obtener una instantánea del documento en la base de datos
+    DocumentSnapshot documentSnapshot = await documentRef.get();
 
-  Future<void> saveReferences() async {
-    try {
-      // Obtener una instancia de la colección en Firebase donde deseas guardar las asignaciones
-      CollectionReference referencesCollection =
-          FirebaseFirestore.instance.collection('references');
+    // Verificar si el documento existe
+    if (documentSnapshot.exists) {
+      // Verificar si los datos del documento han sido modificados
+      Stream<DocumentSnapshot> snapshots = documentRef.snapshots();
+      snapshots.listen((DocumentSnapshot snapshot) async {
+        if (snapshot.data() != documentSnapshot.data()) {
+          // Los datos del documento han sido modificados
+          // Hacer algo aquí
+        }
+      });
 
-      // Verificar si ya existe un documento en la colección
-      QuerySnapshot querySnapshot = await referencesCollection.get();
-      if (querySnapshot.docs.isNotEmpty) {
-        // Si hay un documento, eliminarlo antes de agregar el nuevo
-        await referencesCollection.doc(querySnapshot.docs.first.id).delete();
-      }
-
-      // Crear un documento nuevo en la colección y asignarle los datos de las asignaciones
-      await referencesCollection.add(references);
-
-      // Imprimir un mensaje de éxito en la consola
-      print('Las referencias se guardaron correctamente en Firebase.');
-    } catch (e) {
-      // Manejar cualquier error que ocurra durante el proceso de guardado
-      print('Error al guardar las referencias en Firebase: $e');
+      // Actualizar el documento con los datos proporcionados
+      await documentRef.update(references);
+    } else {
+      // Crear el documento con los datos proporcionados
+      await documentRef.set(references);
     }
   }
 
-  Future<Map<String, String>> getReferencesFromFirebase() async {
-    try {
-      // Obtener la instancia de Firestore y la referencia de la colección
-      final firestoreInstance = FirebaseFirestore.instance;
-      final referencesCollection = firestoreInstance.collection('references');
+  // Future<void> saveReferences() async {
+  //   try {
+  //     // Obtener una instancia de la colección en Firebase donde deseas guardar las asignaciones
+  //     CollectionReference referencesCollection =
+  //         FirebaseFirestore.instance.collection('references');
 
-      // Obtener los documentos de la colección y convertirlos a un Map<String, dynamic>
-      final querySnapshot = await referencesCollection.get();
-      final referencesMap =
-          Map<String, String>.from(querySnapshot.docs.first.data());
+  //     // Verificar si ya existe un documento en la colección
+  //     QuerySnapshot querySnapshot = await referencesCollection.get();
+  //     if (querySnapshot.docs.isNotEmpty) {
+  //       // Si hay un documento, eliminarlo antes de agregar el nuevo
+  //       await referencesCollection.doc(querySnapshot.docs.first.id).delete();
+  //     }
+
+  //     // Crear un documento nuevo en la colección y asignarle los datos de las asignaciones
+  //     await referencesCollection.add(references);
+
+  //     // Imprimir un mensaje de éxito en la consola
+  //     print('Las referencias se guardaron correctamente en Firebase.');
+  //   } catch (e) {
+  //     // Manejar cualquier error que ocurra durante el proceso de guardado
+  //     print('Error al guardar las referencias en Firebase: $e');
+  //   }
+  // }
+
+  Future<Map<String, String>> getReferencesFromFirebase(
+      String documentId) async {
+    try {
+      // Obtener la instancia de Firestore y la referencia del documento
+      final firestoreInstance = FirebaseFirestore.instance;
+      final referencesDocument =
+          firestoreInstance.collection('references').doc(documentId);
+
+      // Obtener la instantánea del documento y convertirlo a un Map<String, dynamic>
+      final documentSnapshot = await referencesDocument.get();
+      final referencesMap = Map<String, String>.from(documentSnapshot.data()!);
 
       // Convertir el mapa de dynamic a Map<String, String>
       final firebaseReferencesBack = referencesMap
@@ -199,7 +218,7 @@ class DataSpreadSheet extends ChangeNotifier {
     final initialList = await fetchData(url);
 
     // Obtener los encabezados actualizados desde Firebase
-    final firebaseReferences = await getReferencesFromFirebase();
+    // final firebaseReferences = await getReferencesFromFirebase();
 
     // Copiar la lista original para no modificarla directamente
     final copyList = List<Map<String, String>>.from(initialList);
@@ -210,13 +229,13 @@ class DataSpreadSheet extends ChangeNotifier {
     for (final entry in mapHeaders.entries) {
       var keyFetchData = entry.key;
       final valueFetchData = entry.value;
-      for (final mapEntry in firebaseReferences.entries) {
-        if (mapEntry.key == valueFetchData) {
-          mapHeaders[mapEntry.value] = mapHeaders.remove(keyFetchData)!;
-          keyFetchData = mapEntry.value;
-          break;
-        }
-      }
+      // for (final mapEntry in firebaseReferences.entries) {
+      //   if (mapEntry.key == valueFetchData) {
+      //     mapHeaders[mapEntry.value] = mapHeaders.remove(keyFetchData)!;
+      //     keyFetchData = mapEntry.value;
+      //     break;
+      //   }
+      // }
     }
 
     // Actualizar el primer mapa de la lista de mapas actualizados con el mapa actualizado

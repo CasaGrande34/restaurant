@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:provider/provider.dart';
 
+import '../../../providers/device_info.dart';
 import '../../../services/data_spreadsheet.dart';
 import '../../../utils/utils_exports.dart';
 import '../widgets/title_connection_url.dart';
@@ -16,6 +17,12 @@ class RegisterTableScreen extends StatefulWidget {
 
 class _RegisterTableScreenState extends State<RegisterTableScreen> {
   bool isButtonPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<DeviceInfoProvider>(context, listen: false).initDeviceInfo();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +43,6 @@ class _RegisterTableScreenState extends State<RegisterTableScreen> {
                   TextButton(
                     child: const Text('Quedarse con el nuevo'),
                     onPressed: () async {
-                      await dataProvider.saveReferences();
                       Navigator.pushNamed(
                           context, '/listTable'); // Cierra el cuadro de diálogo
                     },
@@ -200,14 +206,22 @@ class _RegisterTableScreenState extends State<RegisterTableScreen> {
                             children: [
                               ElevatedButton(
                                 onPressed: () async {
-                                  bool hasData = await dataProvider.checkData();
-                                  if (hasData) {
-                                    showAlertDialog();
-                                  } else {
-                                    await dataProvider.saveReferences();
-                                    Navigator.pushNamed(context, '/listTable');
-                                  }
+                                  await dataProvider
+                                      .createOrUpdateDocumentWithId(
+                                          DeviceInfoProvider.deviceId,
+                                          dataProvider.references);
                                 },
+                                // onPressed: () async {
+                                //   bool hasData = await dataProvider.checkData();
+                                //   if (hasData) {
+                                //     showAlertDialog();
+                                //   } else {
+                                //     await dataProvider.saveReferences();
+                                //     await dataProvider
+                                //         .getCategoriesListComplete();
+                                //     Navigator.pushNamed(context, '/listTable');
+                                //   }
+                                // },
                                 // Resto del código del botón
                                 child: const Text('Ver Menu'),
                               ),
