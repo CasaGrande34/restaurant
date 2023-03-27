@@ -34,7 +34,7 @@ class DataSpreadSheet extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<Map<String, String>>> fetchData(String url) async {
+  Future<List<Map<String, String>>> fetchData() async {
     try {
       // Realizar la solicitud HTTP y esperar la respuesta
       var response = await http.get(Uri.parse(url));
@@ -108,7 +108,7 @@ class DataSpreadSheet extends ChangeNotifier {
   Future<List<String>> getHeadersOwners() async {
     try {
       // Obtener la lista de mapas de la función fetchData
-      List<Map<String, String>> listaDeMapas = await fetchData(url);
+      List<Map<String, String>> listaDeMapas = await fetchData();
 
       // Obtener el primer mapa de la lista de mapas
       Map<String, String> primerMapa = listaDeMapas[0];
@@ -140,6 +140,8 @@ class DataSpreadSheet extends ChangeNotifier {
 
   Future<void> createOrUpdateDocumentWithId(
       String documentId, Map<String, dynamic> references) async {
+    // Agregar la URL a la variable references
+    references['url'] = url;
     // Obtener una referencia al documento que se desea crear o actualizar con el id especificado
     DocumentReference documentRef =
         FirebaseFirestore.instance.collection('references').doc(documentId);
@@ -215,7 +217,7 @@ class DataSpreadSheet extends ChangeNotifier {
   }
 
   Future<List<Map<String, String>>> updateHeadersAndCopyList() async {
-    final initialList = await fetchData(url);
+    final initialList = await fetchData();
 
     // Obtener los encabezados actualizados desde Firebase
     // final firebaseReferences = await getReferencesFromFirebase();
