@@ -7,6 +7,8 @@ import '../../../services/data_spreadsheet.dart';
 import '../../../utils/utils_exports.dart';
 import '../widgets/title_connection_url.dart';
 
+const idDeEmpresa = 'IDDEEMEPRESA';
+
 class RegisterTableView extends StatefulWidget {
   const RegisterTableView({super.key});
 
@@ -116,83 +118,84 @@ class _RegisterTableViewState extends State<RegisterTableView> {
                           ),
                           SizesApp.addVerticalSpace(SizesApp.padding10),
                           Container(
-                              color: Colors.black26,
-                              height: 300,
-                              // width: 300,
-                              child: FutureBuilder<List<String>>(
-                                  future: dataProvider.getHeadersOwners(),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<List<String>> snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      // Si el estado de la conexión es "esperando", se muestra el indicador de carga
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    } else if (snapshot.hasError) {
-                                      // Si hay un error, muestra el error
-                                      return Text('Error: ${snapshot.error}');
-                                    } else {
-                                      // Si la conexión fue exitosa y no hay errores, se muestra el ListView
-                                      List<String> headersOwners =
-                                          snapshot.data!;
-                                      return ListView.builder(
-                                        physics: const BouncingScrollPhysics(),
-                                        itemCount: headersOwners.length,
-                                        itemBuilder: (context, index) {
-                                          final header = headersOwners[index];
-                                          final asignacion =
-                                              dataProvider.references[header];
-                                          final dropdownItems = dataProvider
-                                              .headersTemplates
-                                              .where((itemQueQuitamos) =>
-                                                  !dataProvider.references
-                                                      .containsValue(
-                                                          itemQueQuitamos) ||
+                            color: Colors.black26,
+                            height: 300,
+                            // width: 300,
+                            child: FutureBuilder<List<String>>(
+                              future: dataProvider.getHeadersOwners(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<List<String>> snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  // Si el estado de la conexión es "esperando", se muestra el indicador de carga
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                } else if (snapshot.hasError) {
+                                  // Si hay un error, muestra el error
+                                  return Text('Error: ${snapshot.error}');
+                                } else {
+                                  // Si la conexión fue exitosa y no hay errores, se muestra el ListView
+                                  List<String> headersOwners = snapshot.data!;
+                                  return ListView.builder(
+                                    physics: const BouncingScrollPhysics(),
+                                    itemCount: headersOwners.length,
+                                    itemBuilder: (context, index) {
+                                      final header = headersOwners[index];
+                                      final asignacion =
+                                          dataProvider.references[header];
+                                      final dropdownItems = dataProvider
+                                          .headersTemplates
+                                          .where((itemQueQuitamos) =>
+                                              !dataProvider.references
+                                                  .containsValue(
+                                                      itemQueQuitamos) ||
+                                              dataProvider.references[header] ==
+                                                  itemQueQuitamos)
+                                          .map((item) => DropdownMenuItem(
+                                                value: item,
+                                                child: Text(item),
+                                              ))
+                                          .toList();
+                                      return ListTile(
+                                        leading: const Icon(
+                                          FontAwesomeIcons.sailboat,
+                                          size: 10,
+                                        ),
+                                        textColor: Colors.white,
+                                        title: Text(header),
+                                        trailing: DropdownButton<String>(
+                                          style: FontsApp.roboto.copyWith(
+                                              fontSize: 15,
+                                              color: Colors.white),
+                                          iconEnabledColor: Colors.amber,
+                                          elevation: 8,
+                                          dropdownColor: Colors.blue,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          value: asignacion,
+                                          items: dropdownItems,
+                                          onChanged: (String? value) {
+                                            if (value != null &&
+                                                !dataProvider.references
+                                                    .containsValue(value)) {
+                                              // asegura que el valor sea válido y no se haya asignado a otra cabecera
+                                              setState(
+                                                () {
                                                   dataProvider
-                                                          .references[header] ==
-                                                      itemQueQuitamos)
-                                              .map((item) => DropdownMenuItem(
-                                                    value: item,
-                                                    child: Text(item),
-                                                  ))
-                                              .toList();
-                                          return ListTile(
-                                              leading: const Icon(
-                                                FontAwesomeIcons.sailboat,
-                                                size: 10,
-                                              ),
-                                              textColor: Colors.white,
-                                              title: Text(header),
-                                              trailing: DropdownButton<String>(
-                                                  style: FontsApp.roboto
-                                                      .copyWith(
-                                                          fontSize: 15,
-                                                          color: Colors.white),
-                                                  iconEnabledColor:
-                                                      Colors.amber,
-                                                  elevation: 8,
-                                                  dropdownColor: Colors.blue,
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                  value: asignacion,
-                                                  items: dropdownItems,
-                                                  onChanged: (String? value) {
-                                                    if (value != null &&
-                                                        !dataProvider.references
-                                                            .containsValue(
-                                                                value)) {
-                                                      // asegura que el valor sea válido y no se haya asignado a otra cabecera
-                                                      setState(() {
-                                                        dataProvider.references[
-                                                                header] =
-                                                            value; // actualiza el estado del widget para reflejar el cambio en la asignación
-                                                      });
-                                                    }
-                                                  }));
-                                        },
+                                                          .references[header] =
+                                                      value; // actualiza el estado del widget para reflejar el cambio en la asignación
+                                                },
+                                              );
+                                            }
+                                          },
+                                        ),
                                       );
-                                    }
-                                  })),
+                                    },
+                                  );
+                                }
+                              },
+                            ),
+                          ),
                           SizesApp.addVerticalSpace(SizesApp.padding15),
 
                           // Agrega un botón para guardar las data.asignaciones (aún no hace nada)
@@ -201,16 +204,20 @@ class _RegisterTableViewState extends State<RegisterTableView> {
                             children: [
                               ElevatedButton(
                                 onPressed: () async {
-                                  bool hasData = await dataProvider.checkData();
-                                  if (hasData) {
-                                    showAlertDialog();
-                                  } else {
-                                    await dataProvider.saveReferences();
-                                    await dataProvider
-                                        .getCategoriesListComplete();
-                                    Navigator.pushNamed(context, '/listTable');
-                                  }
+                                  await dataProvider.createDocumentWithId(
+                                      idDeEmpresa, dataProvider.references);
                                 },
+                                // onPressed: () async {
+                                //   bool hasData = await dataProvider.checkData();
+                                //   if (hasData) {
+                                //     showAlertDialog();
+                                //   } else {
+                                //     await dataProvider.saveReferences();
+                                //     await dataProvider
+                                //         .getCategoriesListComplete();
+                                //     Navigator.pushNamed(context, '/listTable');
+                                //   }
+                                // },
                                 // Resto del código del botón
                                 child: const Text('Ver Menu'),
                               ),

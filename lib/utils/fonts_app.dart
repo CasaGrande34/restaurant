@@ -16,4 +16,8 @@ class FontsApp {
     color: Colors.white,
     fontSize: SizesApp.padding25,
   );
+  static final poppins = GoogleFonts.poppins(
+    color: Colors.white,
+    fontSize: SizesApp.padding25,
+  );
 }

@@ -138,6 +138,16 @@ class DataSpreadSheet extends ChangeNotifier {
     }
   }
 
+  Future<void> createDocumentWithId(
+      String documentId, Map<String, dynamic> data) async {
+    // Obtener una referencia al documento que se desea crear con el id especificado
+    DocumentReference docRef =
+        FirebaseFirestore.instance.collection('references').doc(documentId);
+
+    // Crear el documento con los datos proporcionados
+    await docRef.set(data);
+  }
+
   Future<void> saveReferences() async {
     try {
       // Obtener una instancia de la colección en Firebase donde deseas guardar las asignaciones
